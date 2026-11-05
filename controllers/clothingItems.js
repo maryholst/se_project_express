@@ -1,35 +1,97 @@
-const ClothingItems = require("../models/clothingItems");
+const clothingItems = require("../models/clothingItems");
+const {
+  BAD_REQUEST,
+  NOT_FOUND,
+  INTERNAL_SERVER_ERROR,
+} = require("../utils/errors");
 
-module.exports.getClothingitems = (req, res) => {
-  ClothingItems.find({})
+module.exports.getClothingItems = (req, res) => {
+  clothingItems
+    .find({})
     .then((items) => res.send(items))
-    .catch((err) =>
-      res.status(500).send({ message: "An error has occurred on the server" })
-    );
+    .catch((err) => {
+      res
+        .status(INTERNAL_SERVER_ERROR)
+        .send({ message: "Sorry, there was an error with the server" });
+    });
 };
 
 module.exports.createClothingItems = (req, res) => {
   const { name, weather, imageUrl } = req.body;
 
-  ClothingItems.create({
-    name,
-    weather,
-    imageUrl,
-    owner: req.user ? req.user._id : "anonymous",
-  })
+  clothingItems
+    .create({
+      name,
+      weather,
+      imageUrl,
+      owner: req.user ? Reflect.get(req.user, "_id") : "anonymous",
+    })
     .then((item) => res.status(201).send(item))
     .catch((err) => {
-      res.status(400).send({ message: "Bad request" });
+      console.error(err);
+      if (err.name === "ValidationError") {
+        return res
+        .status(BAD_REQUEST).
+        send({ message: "Invalid Item Data" });
+      }
+      return res
+      .status(INTERNAL_SERVER_ERROR)
+      .send({ message: "Sorry, there was an error with the server" });
     });
 };
 
 module.exports.deleteClothingItems = (req, res) => {
-  ClothingItems.findByIdAndDelete(req.params.itemId)
-    .then((item) => {
-      if (!item) {
-        return res.status(404).send({ message: "Item not found" });
+  clothingItems
+    .findByIdAndDelete(req.params.itemId)
+    .orFail()
+    .then((item) => res.status(200).send(item))
+    .catch((err) => {
+      console.error(err);
+      if (err.name === "DocumentNotFoundError") {
+        return res.status(NOT_FOUND).send({ message: "Item not found" });
       }
-      return res.send(item);
-    })
-    .catch(() => res.status(400).send({ message: "Invalid item ID" }));
+      return res
+        .status(INTERNAL_SERVER_ERROR)
+        .send({ message: "Sorry, there was an error with the server" });
+    });
 };
+
+module.exports.createClothingItem = (req, res) => {
+  console.log(req.user._id);
+};
+
+module.exports.likeClothingItems = (req, res) =>
+  ClothingItem.findByIdAndUpdate(
+    req.params.itemId,
+    { $addToSet: { likes: req.user._id } },
+    { new: true }
+  )
+    .orFail()
+    .then((item) => res.status(200).send(item))
+    .catch((err) => {
+      console.error(err);
+      if (err.name === "DocumentNotFoundError") {
+        return res.status(NOT_FOUND).send({ message: "Item not found" });
+      }
+      return res
+        .status(INTERNAL_SERVER_ERROR)
+        .send({ message: "Sorry, there was an error with the server" });
+    });
+
+module.exports.deleteLikeClothingItems = (req, res) =>
+  ClothingItem.findByIdAndUpdate(
+    req.params.itemId,
+    { $pull: { likes: req.user._id } },
+    { new: true }
+  )
+    .orFail()
+    .then((item) => res.status(200).send(item))
+    .catch((err) => {
+      console.error(err);
+      if (err.name === "DocumentNotFoundError") {
+        return res.status(NOT_FOUND).send({ message: "Item not found" });
+      }
+      return res
+        .status(INTERNAL_SERVER_ERROR)
+        .send({ message: " Sorry, there was an error with the server" });
+    });
