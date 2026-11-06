@@ -17,6 +17,10 @@ app.use(express.json());
 app.use("/users", userRoutes);
 app.use("/items", clothingItemRoutes);
 
+app.use((req, res) => {
+  res.status(404).send({ message: "Requested resource not found" });
+});
+
 app.use((err, req, res, next) => {
   if (err instanceof SyntaxError && err.status === 400 && "body" in err) {
     return res.status(400).send({ message: "Invalid JSON body" });
@@ -24,8 +28,17 @@ app.use((err, req, res, next) => {
   return next(err);
 });
 
+app.use((err, req, res, next) => {
+  if (res.headersSent) {
+    return next(err);
+  }
+  return res
+    .status(500)
+    .send({ message: "An error has occurred on the server." });
+});
+
 mongoose
-  .connect("mongodb://127.0.0.1:27017/wtwr_db")
+  .connect("mongodb://localhost:27017/wtwr_db")
   .then(() => {
     app.listen(PORT, () => {
       console.log(`Server listening on port ${PORT}`);

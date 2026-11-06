@@ -24,7 +24,7 @@ const itemSchema = new mongoose.Schema({
     },
   },
   owner: {
-    type: String,
+    type: mongoose.Schema.Types.ObjectId,
     ref: "user",
     required: true,
   },
@@ -36,11 +36,13 @@ const itemSchema = new mongoose.Schema({
       },
     ],
     default: [],
+    required: true,
   },
   createdAt: {
     type: Date,
-    default: Date.now
+    default: Date.now,
+    required: true,
   },
 });
 
-module.exports = mongoose.model("item", itemSchema);
+module.exports = mongoose.model("clothingItem", itemSchema);

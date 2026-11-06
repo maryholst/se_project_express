@@ -1,25 +1,24 @@
-const clothingItems = require("../models/clothingItems");
 const mongoose = require("mongoose");
 const validator = require("validator");
+const clothingItems = require("../models/clothingItems");
 const {
   BAD_REQUEST,
   NOT_FOUND,
   INTERNAL_SERVER_ERROR,
 } = require("../utils/errors");
 
-module.exports.getClothingItems = (req, res) => {
+module.exports.getClothingItems = (req, res) =>
   clothingItems
     .find({})
     .then((items) => res.send(items))
-    .catch((err) => {
+    .catch(() =>
       res
         .status(INTERNAL_SERVER_ERROR)
-        .send({ message: "Sorry, there was an error with the server" });
-    });
-};
+        .send({ message: "An error has occurred on the server." })
+    );
 
 module.exports.createClothingItems = (req, res) => {
-  const { name, weather, imageUrl } = req.body;
+  const { name, weather, imageUrl } = req.body || {};
 
   if (
     !name ||
@@ -33,12 +32,12 @@ module.exports.createClothingItems = (req, res) => {
     return res.status(BAD_REQUEST).send({ message: "Invalid item data" });
   }
 
-  clothingItems
+  return clothingItems
     .create({
       name,
       weather,
       imageUrl,
-      owner: req.user ? Reflect.get(req.user, "_id") : "anonymous",
+      owner: req.user._id,
     })
     .then((item) => res.status(201).send(item))
     .catch((err) => {
@@ -50,7 +49,7 @@ module.exports.createClothingItems = (req, res) => {
       }
       return res
       .status(INTERNAL_SERVER_ERROR)
-      .send({ message: "Sorry, there was an error with the server" });
+      .send({ message: "An error has occurred on the server." });
     });
 };
 
@@ -59,7 +58,7 @@ module.exports.deleteClothingItems = (req, res) => {
     return res.status(BAD_REQUEST).send({ message: "Invalid item ID" });
   }
 
-  clothingItems
+  return clothingItems
     .findByIdAndDelete(req.params.itemId)
     .orFail()
     .then((item) => res.status(200).send(item))
@@ -73,12 +72,8 @@ module.exports.deleteClothingItems = (req, res) => {
       }
       return res
         .status(INTERNAL_SERVER_ERROR)
-        .send({ message: "Sorry, there was an error with the server" });
+        .send({ message: "An error has occurred on the server." });
     });
-};
-
-module.exports.createClothingItem = (req, res) => {
-  console.log(req.user._id);
 };
 
 module.exports.likeClothingItems = (req, res) => {
@@ -106,7 +101,7 @@ module.exports.likeClothingItems = (req, res) => {
       }
       return res
         .status(INTERNAL_SERVER_ERROR)
-        .send({ message: "Sorry, there was an error with the server" });
+        .send({ message: "An error has occurred on the server." });
     });
 };
 
@@ -135,6 +130,6 @@ module.exports.deleteLikeClothingItems = (req, res) => {
       }
       return res
         .status(INTERNAL_SERVER_ERROR)
-        .send({ message: " Sorry, there was an error with the server" });
+        .send({ message: "An error has occurred on the server." });
     });
 };

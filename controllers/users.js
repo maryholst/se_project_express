@@ -1,26 +1,25 @@
-const User = require("../models/users");
 const mongoose = require("mongoose");
 const validator = require("validator");
+const User = require("../models/users");
 const {
   BAD_REQUEST,
   NOT_FOUND,
   INTERNAL_SERVER_ERROR,
 } = require("../utils/errors");
 
-module.exports.getUsers = (req, res) => {
+module.exports.getUsers = (req, res) =>
   User.find({})
     .then((users) => res.send(users))
     .catch(() =>
-      res.status(INTERNAL_SERVER_ERROR).send({ message: "An error has occurred on the server" })
+      res.status(INTERNAL_SERVER_ERROR).send({ message: "An error has occurred on the server." })
     );
-};
 
 module.exports.getUser = (req, res) => {
   if (!mongoose.isValidObjectId(req.params.userId)) {
     return res.status(BAD_REQUEST).send({ message: "Invalid user ID" });
   }
 
-  User.findById(req.params.userId)
+  return User.findById(req.params.userId)
     .orFail()
     .then((user) => res.send(user))
     .catch((err) => {
@@ -33,12 +32,12 @@ module.exports.getUser = (req, res) => {
       }
       return res
         .status(INTERNAL_SERVER_ERROR)
-        .send({ message: "An error has occurred on the server" });
+        .send({ message: "An error has occurred on the server." });
     });
 };
 
 module.exports.createUser = (req, res) => {
-  const { name, avatar } = req.body;
+  const { name, avatar } = req.body || {};
 
   if (
     !name ||
@@ -51,7 +50,7 @@ module.exports.createUser = (req, res) => {
     return res.status(BAD_REQUEST).send({ message: "Invalid user data" });
   }
 
-  User.create({
+  return User.create({
     name,
     avatar
   })
@@ -65,6 +64,6 @@ module.exports.createUser = (req, res) => {
         }
         return res
         .status(INTERNAL_SERVER_ERROR)
-        .send({ message: "Sorry, there was an error with the server" });
+        .send({ message: "An error has occurred on the server." });
       });
 };
