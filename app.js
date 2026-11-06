@@ -4,6 +4,10 @@ const mongoose = require("mongoose");
 const app = express();
 const userRoutes = require("./routes/users");
 const clothingItemRoutes = require("./routes/clothingItems");
+const {
+  NOT_FOUND,
+  INTERNAL_SERVER_ERROR
+} = require("./utils/errors");
 
 const PORT = 3001;
 
@@ -18,12 +22,12 @@ app.use("/users", userRoutes);
 app.use("/items", clothingItemRoutes);
 
 app.use((req, res) => {
-  res.status(404).send({ message: "Requested resource not found" });
+  res.status(NOT_FOUND).send({ message: "Requested resource not found" });
 });
 
 app.use((err, req, res, next) => {
-  if (err instanceof SyntaxError && err.status === 400 && "body" in err) {
-    return res.status(400).send({ message: "Invalid JSON body" });
+  if (err instanceof SyntaxError && err.status === NOT_FOUND && "body" in err) {
+    return res.status(NOT_FOUND).send({ message: "Invalid JSON body" });
   }
   return next(err);
 });
@@ -33,7 +37,7 @@ app.use((err, req, res, next) => {
     return next(err);
   }
   return res
-    .status(500)
+    .status(INTERNAL_SERVER_ERROR)
     .send({ message: "An error has occurred on the server." });
 });
 

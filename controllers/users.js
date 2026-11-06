@@ -45,6 +45,7 @@ module.exports.createUser = (req, res) => {
     name.length < 2 ||
     name.length > 30 ||
     !avatar ||
+    typeof avatar !== "string" ||
     !validator.isURL(avatar)
   ) {
     return res.status(BAD_REQUEST).send({ message: "Invalid user data" });
