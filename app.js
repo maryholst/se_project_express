@@ -17,6 +17,13 @@ app.use(express.json());
 app.use("/users", userRoutes);
 app.use("/items", clothingItemRoutes);
 
+app.use((err, req, res, next) => {
+  if (err instanceof SyntaxError && err.status === 400 && "body" in err) {
+    return res.status(400).send({ message: "Invalid JSON body" });
+  }
+  return next(err);
+});
+
 mongoose
   .connect("mongodb://127.0.0.1:27017/wtwr_db")
   .then(() => {
