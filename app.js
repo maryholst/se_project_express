@@ -2,12 +2,7 @@ const express = require("express");
 const mongoose = require("mongoose");
 
 const app = express();
-const userRoutes = require("./routes/users");
-const clothingItemRoutes = require("./routes/clothingItems");
-const {
-  NOT_FOUND,
-  INTERNAL_SERVER_ERROR
-} = require("./utils/errors");
+const routes = require("./routes");
 
 const PORT = 3001;
 
@@ -17,29 +12,7 @@ app.use((req, res, next) => {
 });
 
 app.use(express.json());
-
-app.use("/users", userRoutes);
-app.use("/items", clothingItemRoutes);
-
-app.use((req, res) => {
-  res.status(NOT_FOUND).send({ message: "Requested resource not found" });
-});
-
-app.use((err, req, res, next) => {
-  if (err instanceof SyntaxError && err.status === NOT_FOUND && "body" in err) {
-    return res.status(NOT_FOUND).send({ message: "Invalid JSON body" });
-  }
-  return next(err);
-});
-
-app.use((err, req, res, next) => {
-  if (res.headersSent) {
-    return next(err);
-  }
-  return res
-    .status(INTERNAL_SERVER_ERROR)
-    .send({ message: "An error has occurred on the server." });
-});
+app.use(routes);
 
 mongoose
   .connect("mongodb://localhost:27017/wtwr_db")

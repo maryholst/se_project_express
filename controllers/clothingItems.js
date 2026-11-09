@@ -11,11 +11,12 @@ module.exports.getClothingItems = (req, res) =>
   clothingItems
     .find({})
     .then((items) => res.send(items))
-    .catch(() =>
-      res
+    .catch((err) => {
+      console.error(err);
+      return res
         .status(INTERNAL_SERVER_ERROR)
-        .send({ message: "An error has occurred on the server." })
-    );
+        .send({ message: "An error has occurred on the server." });
+    });
 
 module.exports.createClothingItems = (req, res) => {
   const { name, weather, imageUrl } = req.body || {};
@@ -27,6 +28,7 @@ module.exports.createClothingItems = (req, res) => {
     name.length > 30 ||
     !["hot", "warm", "cold"].includes(weather) ||
     !imageUrl ||
+    typeof imageUrl !== "string" ||
     !validator.isURL(imageUrl)
   ) {
     return res.status(BAD_REQUEST).send({ message: "Invalid item data" });

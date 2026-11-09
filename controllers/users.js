@@ -10,9 +10,12 @@ const {
 module.exports.getUsers = (req, res) =>
   User.find({})
     .then((users) => res.send(users))
-    .catch(() =>
-      res.status(INTERNAL_SERVER_ERROR).send({ message: "An error has occurred on the server." })
-    );
+    .catch((err) => {
+      console.error(err);
+      return res
+        .status(INTERNAL_SERVER_ERROR)
+        .send({ message: "An error has occurred on the server." });
+    });
 
 module.exports.getUser = (req, res) => {
   if (!mongoose.isValidObjectId(req.params.userId)) {
