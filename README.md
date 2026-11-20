@@ -130,3 +130,8 @@ The API returns:
 - `500 Internal Server Error` for unexpected server errors
 
 Error responses contain a JSON `message` field describing the error.
+
+## Project Pitch HERE
+https://www.loom.com/share/409b46c541e94262975ce70993b9024e
+
+^^^^^^^^^^
