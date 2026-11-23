@@ -5,20 +5,11 @@ const User = require("../models/users");
 const { JWT_SECRET } = require("../utils/config");
 const {
   BAD_REQUEST,
+  UNATHORIZED,
   NOT_FOUND,
   CONFLICT,
   INTERNAL_SERVER_ERROR,
 } = require("../utils/errors");
-
-module.exports.getUsers = (req, res) =>
-  User.find({})
-    .then((users) => res.send(users))
-    .catch((err) => {
-      console.error(err);
-      return res
-        .status(INTERNAL_SERVER_ERROR)
-        .send({ message: "An error has occurred on the server." });
-    });
 
 module.exports.getCurrentUser = (req, res) =>
   User.findById(req.user._id)
@@ -151,8 +142,8 @@ module.exports.login = (req, res) => {
       return res.send({ token });
     })
     .catch((err) => {
-      if (err.statusCode === 401) {
-        return res.status(401).send({ message: "Invalid email or password" });
+      if (err.statusCode === UNATHORIZED) {
+        return res.status(UNATHORIZED).send({ message: "Invalid email or password" });
       }
       console.error(err);
       return res

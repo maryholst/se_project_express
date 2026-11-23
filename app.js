@@ -4,7 +4,6 @@ const mongoose = require("mongoose");
 const app = express();
 const routes = require("./routes");
 const users = require("./controllers/users");
-const auth = require("./middlewares/auth");
 
 const PORT = 3001;
 
@@ -15,7 +14,6 @@ app.use(cors());
 app.use(express.json());
 app.post("/signin", users.login);
 app.post("/signup", users.createUser);
-app.use(auth);
 app.use(routes);
 
 mongoose
