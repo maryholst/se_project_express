@@ -4,11 +4,13 @@ const jwt = require("jsonwebtoken");
 const User = require("../models/users");
 const { JWT_SECRET } = require("../utils/config");
 const {
+  CREATED,
   BAD_REQUEST,
-  UNATHORIZED,
+  UNAUTHORIZED,
   NOT_FOUND,
   CONFLICT,
   INTERNAL_SERVER_ERROR,
+  MONGO_DUPLICATE_KEY
 } = require("../utils/errors");
 
 module.exports.getCurrentUser = (req, res) =>
@@ -101,10 +103,10 @@ module.exports.createUser = async (req, res) => {
 
     const userData = user.toObject();
     delete userData.password;
-    return res.status(201).send(userData);
+    return res.status(CREATED).send(userData);
   } catch (err) {
     console.error(err);
-    if (err.code === 11000) {
+    if (err.code === MONGO_DUPLICATE_KEY) {
       return res.status(CONFLICT).send({ message: "Email already exists" });
     }
     if (err.name === "ValidationError") {
@@ -142,8 +144,8 @@ module.exports.login = (req, res) => {
       return res.send({ token });
     })
     .catch((err) => {
-      if (err.statusCode === UNATHORIZED) {
-        return res.status(UNATHORIZED).send({ message: "Invalid email or password" });
+      if (err.statusCode === UNAUTHORIZED) {
+        return res.status(UNAUTHORIZED).send({ message: "Invalid email or password" });
       }
       console.error(err);
       return res
